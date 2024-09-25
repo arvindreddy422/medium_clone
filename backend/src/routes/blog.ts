@@ -30,7 +30,7 @@ blogRouter.use('/*', async (c, next) => {
   } catch (error) {
     c.status(403)
     return c.json({
-      message: 'You are not login',
+      message: error,
     })
   }
 })
@@ -93,7 +93,18 @@ blogRouter.get('/bulk', async (c) => {
   const id = await c.get('userId')
 
   try {
-    const posts = await prisma.post.findMany()
+    const posts = await prisma.post.findMany({
+      select: {
+        content: true,
+        title: true,
+        id: true,
+        author: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    })
     return c.json({ posts })
   } catch (e) {
     c.status(411)
@@ -109,7 +120,19 @@ blogRouter.get('/:id', async (c) => {
 
   try {
     const post = await prisma.post.findFirst({
-      where: { id },
+      where: {
+        id,
+      },
+      select: {
+        content: true,
+        title: true,
+        id: true,
+        author: {
+          select: {
+            name: true,
+          },
+        },
+      },
     })
 
     return c.json({ post })
